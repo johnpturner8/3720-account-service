@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  title: User Account Service API
+  description: This API is for the User Account Service. This service handles all login processes
+        and stores user profile information. The API will handle login requests (reading from user database), 
+        creating new user accounts, updating user profiles, and deleting user accounts as needed. This API will
+        be used by every user that needs to login with their username and password.
+  
+servers:
+  - url: https://CUSports/v1
+
+security:
+  - BasicAuth: []
+
+paths:
+  /users:
+    get:
+      description: Returns a single user account along with the profile information corresponding to the user's assigned role
+      parameters:
+        - $ref: '#/components/parameters/username'
+        - $ref: '#/components/parameters/password'
+
+      responses:
+        '200':
+          description: Successfully returned a user account along with its correct information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/400Error'
+
+    post:
+      description: Lets a user create a new account and assign its unique profile information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+    
+      responses:
+        '201':
+          $ref: '#/components/responses/201Success'
+        '400':
+          $ref: '#/components/responses/400Error'
+
+    delete:
+      description: Lets an admin user delete a user account and its corresponding user profile information from a given username.
+      parameters:
+        - $ref: '#/components/parameters/username'    
+
+      responses:
+        '200':  
+          description: User profile was successfully removed from database.
+          content:
+            application/json:
+              schema:
+                type: object 
+                properties:
+                  message:
+                    type: string
+
+        '400':
+          $ref: '#/components/responses/400Error'
+          
+
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    User:
+      type: object
+      description: This user schema contains all possible user properties that 
+        a CUSports account might contain. Different user roles will contain different
+        properties as needed.
+      required:
+        - username
+        - password
+        - user_role
+      properties:
+        username:
+          type: string
+        password:
+            type: string
+        full_name:
+          type: string
+        user_token:
+            type: integer
+        user_role:
+            type: string
+        email:
+            type: string
+        phone_number:
+            type: integer
+        delivery_preference:
+            type: string
+        notification_preference:
+            type: string
+        inventory_alerts:
+            type: string
+        loyalty_number:
+            type: integer
+        payment_info:
+            type: string
+        admin_privelege:
+            type: boolean
+
+
+  parameters:
+    username:
+      name: username
+      in: query
+      description: Parameter for the account's username
+      required: true
+      schema:
+        type: string
+      
+    password:
+      name: password
+      in: query
+      description:  Parameter for the account's password
+      required: true
+      schema:
+        type: string
+
+  responses:
+    '201Success':  
+      description: User was successfully added to database.
+      content:
+        application/json:
+          schema:
+            type: object 
+            properties:
+              message:
+                type: string
+    400Error:
+      description: Invalid request, Failed to complete account request.
+      content:
+        application/json:
+          schema:
+            type: object 
+            properties:
+              message:  
+                type: string
